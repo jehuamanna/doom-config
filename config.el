@@ -226,7 +226,6 @@
 ;;        ;; Add more keybindings as needed
 ;;        ))
 
-;; (setq chatgpt-shell-openai-key (getenv "OPENAI_API_KEY"))
 (setq chatgpt-shell-openai-key
       (lambda ()
         (auth-source-pick-first-password :host "api.openai.com")))
