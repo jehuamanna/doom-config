@@ -212,7 +212,7 @@
 
 (use-package! lsp-tailwindcss)
 
-
+(setq auth-sources '((:source "~/.authinfo")))
 
 ;; (map! :leader
 ;;       (:prefix ("l" . "LSP")
@@ -225,11 +225,11 @@
 ;;        :desc "LSP rename" "R" #'lsp-rename
 ;;        ;; Add more keybindings as needed
 ;;        ))
-(setq chatgpt-shell-openai-key "sk-proj-Xz56427jjDaXmETYCf5mT3BlbkFJy0tVGPxzG0tydk3g4qsL")
 
-
-
-
+;; (setq chatgpt-shell-openai-key (getenv "OPENAI_API_KEY"))
+(setq chatgpt-shell-openai-key
+      (lambda ()
+        (auth-source-pick-first-password :host "api.openai.com")))
 
 ;; Enable this to make it easier to copy minibuffer messages
 (defun copy-minibuffer-message ()
