@@ -32,7 +32,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
+(setq doom-theme 'doom-one-light)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -251,3 +251,108 @@
   (define-key evil-normal-state-map (kbd "g z u") 'evil-mc-undo-last-added-cursor)
   (define-key evil-normal-state-map (kbd "g z a") 'evil-mc-make-all-cursors)
   (define-key evil-normal-state-map (kbd "g z q") 'evil-mc-undo-all-cursors))
+
+(use-package! all-the-icons
+  :if (display-graphic-p))
+
+
+
+(use-package! ripgrep
+  :commands (ripgrep-regexp))
+
+(use-package! projectile-ripgrep
+  :after projectile
+  :commands (projectile-ripgrep))
+
+
+
+;; Set PATH for Emacs
+(setenv "PATH" (concat (getenv "PATH") ":/usr/bin"))
+(setq exec-path (append exec-path '("/usr/bin")))
+
+
+;; ~/.doom.d/config.el
+
+(use-package! consult
+  :bind (("C-s" . consult-line)
+         :map projectile-command-map
+         ("s r" . consult-ripgrep))
+  :init
+  ;; Optionally configure the narrowing key.
+  (setq consult-narrow-key "<")
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function 'consult-xref
+        xref-show-definitions-function 'consult-xref)
+  ;; Configure other variables and consult functions as needed
+  )
+
+(defun consult-ripgrep-to-buffer (search-term output-buffer-name)
+  "Run consult-ripgrep with SEARCH-TERM and redirect output to OUTPUT-BUFFER-NAME."
+  (interactive "sEnter search term (regex): \nsOutput buffer name: ")
+  (let ((output-buffer (get-buffer-create output-buffer-name))
+        (consult-ripgrep-args (concat "rg -U --with-filename --no-heading --line-number --color=never -e \"" search-term "\"")))
+    (with-current-buffer output-buffer
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        (insert (format "Ripgrep results for: %s\n\n" search-term))
+        (insert (shell-command-to-string consult-ripgrep-args))
+        (goto-char (point-min))
+        (compilation-mode)))
+    (display-buffer output-buffer '(display-buffer-pop-up-window . ((side . right) (slot . 1) (window-width . 0.5))))
+    (message "Search results saved to buffer: %s" output-buffer-name)))
+
+(map! :leader
+      :desc "Consult ripgrep to buffer"
+      "z s R" #'consult-ripgrep-to-buffer)
+
+
+
+;; ~/.doom.d/config.el
+
+(after! compile
+  ;; Add support for ripgrep output in compilation-mode
+  (add-to-list 'compilation-error-regexp-alist-alist
+               '(ripgrep
+                 "^\\([^:]+\\):\\([0-9]+\\):\\([0-9]+\\):"
+                 1 2 3))
+  (add-to-list 'compilation-error-regexp-alist 'ripgrep))
+
+
+
+;; ;; Add the directory containing the .so file to the load path
+;; (add-to-list 'load-path "~/.config/emacs/tree-sitter/")
+
+;; ;; Ensure Tree-sitter and Tree-sitter-langs are loaded
+;; (use-package! tree-sitter
+;;   :config
+;;   (global-tree-sitter-mode))
+
+;; (use-package! tree-sitter-langs
+;;   :after tree-sitter)
+
+;; ;; Add the JSON grammar to Tree-sitter
+;; (use-package! tree-sitter
+;;   :config
+;;   (tree-sitter-load 'json "~/.config/emacs/tree-sitter/libtree-sitter-json.so")
+;;   (tree-sitter-load 'sql "~/.config/emacs/tree-sitter/libtree-sitter-sql.so"))
+
+
+
+;; Install and enable sql-indent
+(use-package! sql-indent
+  :hook (sql-mode . sqlind-minor-mode))
+
+;; Optional: Customize indentation settings
+(after! sql-indent
+  (setq sqlind-basic-offset 4))  ;; Set the basic indentation level to 4 spaces
+
+;; Install and configure sqlformat
+(use-package! sqlformat
+  :hook (sql-mode . sqlformat-on-save-mode)  ;; Automatically format SQL on save
+  :config
+  (setq sqlformat-command 'pgformatter)        ;; Set the command to use for formatting
+  (setq sqlformat-args '("-s2" "-g")))
+
+;; Keybinding for manually formatting the buffer
+(map! :map sql-mode-map
+ 
