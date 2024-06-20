@@ -57,3 +57,12 @@
 (package! lsp-tailwindcss :recipe (:host github :repo "merrickluo/lsp-tailwindcss"))
 (package! chatgpt-shell)
 (package! polymode)
+(package! all-the-icons)
+(package! consult)
+(package! ripgrep)
+(package! rg)
+(package! tree-sitter)
+(package! tree-sitter-langs)
+(package! sqlformat)
+(package! sql-indent)
+
