@@ -1,1 +1,46 @@
---prefix=/usr/local/ 'CFLAGS=-O2 -march=native' 'LDFLAGS=-L/usr/lib -L/usr/local/lib' 'CPPFLAGS=-I/usr/include -I/usr/local/include' 'FREETYPE_LIBS=-I/usr/include -I/usr/local/include' --with-native-compilation --with-x-toolkit=gtk3 --with-x-toolkit=lucid --with-modules --with-harfbuzz --with-compress-install --with-threads --with-included-regex --with-cairo --with-zlib --with-jpeg --with-png --with-imagemagick --with-tiff --with-xpm --with-gnutls --with-xft --with-xml2 --with-mailutils --with-rsvg --with-pop --with-sound --with-tree-sitter --with-sqlite3 --with-xwidgets --with-gconf --with-m17n-flt --with-otf --with-systemd --with-gpm --with-lcms2
+sudo apt install libmagickwand-dev libmagickcore-dev imagemagick
+sudo apt install libgtk-3-dev libglib2.0-dev
+sudo apt install libwebkit2gtk-4.1-dev 
+sudo apt install libgccjit-13-dev gcc-13
+sudo apt install libxpm-dev   libgif-dev   libgnutls28-dev   libtree-sitter-dev
+ 
+ 
+ 
+./configure \
+  --prefix=/usr/local \
+  CFLAGS='-O2 -march=native -g' \
+  LDFLAGS='-L/usr/lib -L/usr/local/lib' \
+  CPPFLAGS='-I/usr/include -I/usr/local/include' \
+  FREETYPE_LIBS='-I/usr/include -I/usr/local/include' \
+  --with-x \
+  --with-x-toolkit=gtk3 \
+  --with-xwidgets \
+  --with-native-compilation \
+  --with-modules \
+  --with-threads \
+  --with-compress-install \
+  --with-included-regex \
+  --with-cairo \
+  --with-harfbuzz \
+  --with-rsvg \
+  --with-gnutls \
+  --with-xml2 \
+  --with-zlib \
+  --with-jpeg \
+  --with-png \
+  --with-tiff \
+  --with-gif \
+  --with-imagemagick \
+  --with-sqlite3 \
+  --with-tree-sitter \
+  --with-mailutils \
+  --with-pop \
+  --with-sound \
+  --with-gpm \
+  --with-lcms2
+
+
+make -j"$(nproc)"
+sudo make install
+
+(xwidget-webkit-browse-url "https://jw.org")
