@@ -10,7 +10,9 @@ libxpm-dev   \
 libgif-dev   \
 libgnutls28-dev   \
 libtree-sitter-dev \
-libncurses-dev
+libncurses-dev \
+autoconf \
+texinfo
  
  
  
