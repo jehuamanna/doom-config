@@ -54,3 +54,33 @@ make -j"$(nproc)"
 sudo make install
 
 (xwidget-webkit-browse-url "https://jw.org")
+
+
+
+
+./configure \
+  --prefix=/usr/local \
+  CFLAGS='-O3 -march=native -mtune=native -fomit-frame-pointer' \
+  --enable-link-time-optimization \
+  --with-pgtk \
+  --with-native-compilation \
+  --with-modules \
+  --with-threads \
+  --with-compress-install \
+  --with-cairo \
+  --with-harfbuzz \
+  --with-rsvg \
+  --with-gnutls \
+  --with-xml2 \
+  --with-zlib \
+  --with-jpeg \
+  --with-png \
+  --with-tiff \
+  --with-gif \
+  --with-imagemagick \
+  --with-sqlite3 \
+  --with-tree-sitter \
+  --with-mailutils \
+  --with-pop \
+  --with-sound \
+  --with-lcms2
