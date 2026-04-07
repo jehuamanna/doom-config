@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+h
 
 set -Eeuo pipefail
 IFS=$'\n\t'
@@ -33,7 +33,7 @@ retry() {
   local count=0
   until "$@"; do
     count=$((count + 1))
-    if (( count >= attempts )); then
+    if ((count >= attempts)); then
       echo "Command failed after $attempts attempts: $*"
       return 1
     fi
@@ -46,43 +46,62 @@ PREFIX="${PREFIX:-/usr/local}"
 TARBALL="emacs-${EMACS_VERSION}.tar.xz"
 URL="https://ftp.gnu.org/gnu/emacs/${TARBALL}"
 
-if command -v emacs >/dev/null 2>&1; then
-  if emacs --version | grep -q "${EMACS_VERSION}"; then
-    echo "Emacs ${EMACS_VERSION} already installed"
-    exit 0
-  fi
-fi
-
 require_cmd sudo
 require_cmd wget
 require_cmd tar
 require_cmd make
 
-BUILD_DIR="$(mktemp -d)"
-cd "$BUILD_DIR"
+echo "Removing any existing Emacs installation"
+
+if command -v emacs >/dev/null 2>&1; then
+  sudo rm -f /usr/local/bin/emacs || true
+  sudo rm -rf /usr/local/share/emacs || true
+  sudo rm -rf /usr/local/libexec/emacs || true
+fi
 
 sudo apt-get update -y
 
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
-  libmagickwand-dev \
-  libmagickcore-dev \
-  imagemagick \
+  build-essential \
+  autoconf \
+  texinfo \
+  xz-utils \
+  wget \
+  gcc-13 \
+  libgccjit-13-dev \
   libgtk-3-dev \
   libglib2.0-dev \
   libwebkit2gtk-4.1-dev \
-  libgccjit-13-dev \
-  gcc-13 \
-  libxpm-dev \
-  libgif-dev \
-  libgnutls28-dev \
-  libtree-sitter-dev \
   libncurses-dev \
-  autoconf \
-  texinfo \
-  wget \
-  xz-utils \
-  build-essential
+  libtree-sitter-dev \
+  libgnutls28-dev \
+  libgif-dev \
+  libxpm-dev \
+  libjpeg-dev \
+  libpng-dev \
+  libtiff-dev \
+  libmagickwand-dev \
+  libmagickcore-dev \
+  imagemagick \
+  libxml2-dev \
+  libsqlite3-dev \
+  libharfbuzz-dev \
+  libcairo2-dev \
+  librsvg2-dev \
+  liblcms2-dev \
+  mailutils \
+  libx11-dev \
+  libxrandr-dev \
+  libxinerama-dev \
+  libxcursor-dev \
+  libxfixes-dev \
+  libxi-dev \
+  libxext-dev
 
+BUILD_DIR="$(mktemp -d)"
+cd "$BUILD_DIR"
+
+echo "Downloading Emacs ${EMACS_VERSION}"
 retry 3 wget -q --show-progress "$URL"
 
 tar -xf "$TARBALL"
@@ -95,12 +114,15 @@ if ! command -v "$CC_BIN" >/dev/null 2>&1; then
   exit 1
 fi
 
+echo "Configuring build (X11)"
+
 ./configure \
   --prefix="$PREFIX" \
   CC="$CC_BIN" \
   CFLAGS='-O3 -march=native -mtune=native -fomit-frame-pointer' \
   --enable-link-time-optimization \
-  --with-pgtk \
+  --with-x-toolkit=gtk3 \
+  --with-x \
   --with-native-compilation \
   --with-modules \
   --with-threads \
@@ -128,9 +150,13 @@ if [[ "$JOBS" -gt 1 ]]; then
   JOBS=$((JOBS - 1))
 fi
 
+echo "Building with $JOBS jobs"
 make -j"$JOBS"
 
+echo "Installing Emacs"
 sudo make install
+
+echo "Verifying installation"
 
 if ! command -v emacs >/dev/null 2>&1; then
   echo "Installation failed: emacs not found in PATH"
@@ -142,4 +168,4 @@ if ! emacs --version | grep -q "${EMACS_VERSION}"; then
   exit 1
 fi
 
-echo "Emacs ${EMACS_VERSION} installed successfully"
+echo "Emacs ${EMACS_VERSION} installed successfully (X11 build)"
